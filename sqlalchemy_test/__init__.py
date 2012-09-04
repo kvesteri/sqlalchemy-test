@@ -43,6 +43,9 @@ class ModelTestCase(object):
     def assert_primary_key(self, column_name):
         assert self.columns[column_name].primary_key
 
+    def assert_foreign_key(self, column_name):
+        assert self.columns[column_name].foreign_keys
+
     def assert_unique(self, column_name):
         assert self.columns[column_name].unique
 
@@ -102,6 +105,8 @@ def generate_test_case(model, path):
             lines.extend(generate_length_test(name, column.type.length))
         if column.primary_key:
             lines.extend(generate_primary_key_test(name))
+        if column.foreign_keys:
+            lines.extend(generate_foreign_key_test(name))
         if column.default:
             lines.extend(generate_default_test(name, column.default.arg))
         if column.server_default:
@@ -160,6 +165,13 @@ def generate_primary_key_test(name):
     return [
         "    def test_%s_is_primary_key(self):" % name.lower(),
         "        self.assert_primary_key('%s')%s" % (name.lower(), os.linesep)
+    ]
+
+
+def generate_foreign_key_test(name):
+    return [
+        "    def test_%s_has_foreign_key(self):" % name.lower(),
+        "        self.assert_foreign_key('%s')%s" % (name.lower(), os.linesep)
     ]
 
 

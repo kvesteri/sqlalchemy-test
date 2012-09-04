@@ -21,6 +21,21 @@ class TestUser(ModelTestCase):
     def test_status_is_autoincremented(self):
         self.assert_autoincrement('status')
 
+    def test_has_address_id(self):
+        self.assert_has('address_id')
+
+    def test_address_id_is_integer(self):
+        self.assert_type('address_id', sa.Integer)
+
+    def test_address_id_is_nullable(self):
+        self.assert_nullable('address_id')
+
+    def test_address_id_has_foreign_key(self):
+        self.assert_foreign_key('address_id')
+
+    def test_address_id_is_autoincremented(self):
+        self.assert_autoincrement('address_id')
+
     def test_has_description(self):
         self.assert_has('description')
 
@@ -81,6 +96,24 @@ class TestUser(ModelTestCase):
     def test_is_active_is_autoincremented(self):
         self.assert_autoincrement('is_active')
 
+    def test_has_id(self):
+        self.assert_has('id')
+
+    def test_id_is_biginteger(self):
+        self.assert_type('id', sa.BigInteger)
+
+    def test_id_is_not_nullable(self):
+        self.assert_not_nullable('id')
+
+    def test_id_is_primary_key(self):
+        self.assert_primary_key('id')
+
+    def test_id_has_foreign_key(self):
+        self.assert_foreign_key('id')
+
+    def test_id_is_autoincremented(self):
+        self.assert_autoincrement('id')
+
     def test_has_email(self):
         self.assert_has('email')
 
@@ -98,21 +131,6 @@ class TestUser(ModelTestCase):
 
     def test_email_is_unique(self):
         self.assert_unique('email')
-
-    def test_has_id(self):
-        self.assert_has('id')
-
-    def test_id_is_biginteger(self):
-        self.assert_type('id', sa.BigInteger)
-
-    def test_id_is_not_nullable(self):
-        self.assert_not_nullable('id')
-
-    def test_id_is_primary_key(self):
-        self.assert_primary_key('id')
-
-    def test_id_is_autoincremented(self):
-        self.assert_autoincrement('id')
 
     def test_has_name(self):
         self.assert_has('name')

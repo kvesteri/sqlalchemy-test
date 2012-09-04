@@ -54,6 +54,9 @@ class TestUser(TestEntity):
     def test_assert_server_default(self):
         self.assert_server_default('is_active', 'FALSE')
 
+    def test_assert_foreign_key(self):
+        self.assert_foreign_key('address_id')
+
 
 class TestTestCaseGeneration(object):
     def test_something(self):
