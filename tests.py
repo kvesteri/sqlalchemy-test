@@ -31,6 +31,9 @@ class User(Entity):
 class TestEntity(ModelTestCase):
     model = Entity
 
+    def test_name_is_not_nullable(self):
+        self.assert_not_nullable('name')
+
     def test_has_name(self):
         self.assert_has('name')
 
@@ -46,6 +49,9 @@ class TestUser(TestEntity):
 
     def test_assert_table_name(self):
         self.assert_table_name('user')
+
+    def test_assert_name_is_nullable(self):
+        self.assert_nullable('age')
 
     def test_assert_length(self):
         self.assert_length('description', 255)

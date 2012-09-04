@@ -50,6 +50,12 @@ class ModelTestCase(object):
     def assert_default(self, column_name, default):
         assert self.columns[column_name].default.arg == default
 
+    def assert_nullable(self, column_name):
+        assert self.columns[column_name].nullable
+
+    def assert_not_nullable(self, column_name):
+        assert not self.columns[column_name].nullable
+
     def assert_autoincrement(self, column_name):
         assert self.columns[column_name].autoincrement
 
