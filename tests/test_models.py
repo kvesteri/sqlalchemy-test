@@ -51,6 +51,9 @@ class TestUser(TestEntity):
     def test_assert_index(self):
         self.assert_index('age')
 
+    def test_assert_server_default(self):
+        self.assert_server_default('is_active', 'FALSE')
+
 
 class TestTestCaseGeneration(object):
     def test_something(self):

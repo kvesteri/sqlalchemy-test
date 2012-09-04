@@ -51,6 +51,9 @@ class ModelTestCase(object):
     def assert_default(self, column_name, default):
         assert self.columns[column_name].default.arg == default
 
+    def assert_server_default(self, column_name, default):
+        assert self.columns[column_name].server_default.arg == default
+
     def assert_nullable(self, column_name):
         assert self.columns[column_name].nullable
 
@@ -95,6 +98,10 @@ def generate_test_case(model, path):
             lines.extend(generate_primary_key_test(name))
         if column.default:
             lines.extend(generate_default_test(name, column.default.arg))
+        if column.server_default:
+            lines.extend(
+                generate_server_default_test(name, column.server_default.arg)
+            )
         if column.autoincrement:
             lines.extend(generate_autoincrement_test(name))
         if column.unique:
@@ -160,7 +167,7 @@ def generate_autoincrement_test(name):
 
 
 def generate_default_test(name, default):
-    lines = ["    def test_default_value_of_%s(self):" % name.lower()]
+    lines = ["    def test_default_of_%s(self):" % name.lower()]
 
     if isinstance(default, basestring):
         lines.append(
@@ -171,6 +178,24 @@ def generate_default_test(name, default):
     else:
         lines.append(
             "        self.assert_default('%s', %s)%s" % (
+                name.lower(), default, os.linesep
+            )
+        )
+    return lines
+
+
+def generate_server_default_test(name, default):
+    lines = ["    def test_server_default_of_%s(self):" % name.lower()]
+
+    if isinstance(default, basestring):
+        lines.append(
+            "        self.assert_server_default('%s', '%s')%s" % (
+                name.lower(), default, os.linesep
+            )
+        )
+    else:
+        lines.append(
+            "        self.assert_server_default('%s', %s)%s" % (
                 name.lower(), default, os.linesep
             )
         )

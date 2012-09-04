@@ -21,6 +21,6 @@ class User(Entity):
     id = sa.Column(sa.BigInteger, sa.ForeignKey(Entity.id), primary_key=True)
     email = sa.Column(sa.Unicode(255), unique=True, nullable=False)
     status = sa.Column(sa.Enum(*STATUSES))
-    is_active = sa.Column(sa.Boolean, default=False)
+    is_active = sa.Column(sa.Boolean, default=False, server_default='FALSE')
     age = sa.Column(sa.Integer, index=True)
     description = sa.Column(sa.Unicode(255))
