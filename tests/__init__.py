@@ -1,6 +1,5 @@
 import sqlalchemy as sa
-
-
+from sqlalchemy.sql.expression import false
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -22,5 +21,6 @@ class User(Entity):
     email = sa.Column(sa.Unicode(255), unique=True, nullable=False)
     status = sa.Column(sa.Enum(*STATUSES))
     is_active = sa.Column(sa.Boolean, default=False, server_default='FALSE')
+    is_confirmed = sa.Column(sa.Boolean, server_default=false())
     age = sa.Column(sa.Integer, index=True)
     description = sa.Column(sa.Unicode(255))

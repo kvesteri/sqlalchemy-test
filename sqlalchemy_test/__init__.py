@@ -1,4 +1,5 @@
 import os
+from sqlalchemy.sql.expression import _False, _True
 from sqlalchemy.orm.properties import ColumnProperty
 
 
@@ -52,7 +53,12 @@ class ModelTestCase(object):
         assert self.columns[column_name].default.arg == default
 
     def assert_server_default(self, column_name, default):
-        assert self.columns[column_name].server_default.arg == default
+        column_default = self.columns[column_name].server_default.arg
+        if default.__class__ == column_default.__class__:
+            if isinstance(default, _False) or isinstance(default, _True):
+                return True
+
+        assert column_default == default
 
     def assert_nullable(self, column_name):
         assert self.columns[column_name].nullable
@@ -185,21 +191,19 @@ def generate_default_test(name, default):
 
 
 def generate_server_default_test(name, default):
-    lines = ["    def test_server_default_of_%s(self):" % name.lower()]
-
     if isinstance(default, basestring):
-        lines.append(
-            "        self.assert_server_default('%s', '%s')%s" % (
-                name.lower(), default, os.linesep
-            )
+        default = "'%s'" % default
+    elif isinstance(default, _False):
+        default = 'sa.sql.expression.false()'
+    elif isinstance(default, _True):
+        default = 'sa.sql.expression.true()'
+
+    return [
+        "    def test_server_default_of_%s(self):" % name.lower(),
+        "        self.assert_server_default('%s', %s)%s" % (
+            name.lower(), default, os.linesep
         )
-    else:
-        lines.append(
-            "        self.assert_server_default('%s', %s)%s" % (
-                name.lower(), default, os.linesep
-            )
-        )
-    return lines
+    ]
 
 
 def generate_unique_test(name):
