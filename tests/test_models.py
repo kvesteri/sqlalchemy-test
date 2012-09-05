@@ -1,7 +1,7 @@
 from pytest import raises
 import sqlalchemy as sa
 from sqlalchemy_test import ModelTestCase, generate_test_case
-from tests import Entity, User
+from tests import Address, Entity, User
 
 
 class TestEntity(ModelTestCase):
@@ -55,7 +55,15 @@ class TestUser(TestEntity):
         self.assert_server_default('is_active', 'FALSE')
 
     def test_assert_foreign_key(self):
-        self.assert_foreign_key('address_id')
+        self.assert_foreign_key(
+            'address_id',
+            sa.ForeignKey(
+                Address.id,
+                deferrable=True,
+                ondelete='CASCADE',
+                onupdate='CASCADE'
+            )
+        )
 
 
 class TestTestCaseGeneration(object):

@@ -30,6 +30,14 @@ class User(Entity):
     is_confirmed = sa.Column(sa.Boolean, server_default=false())
     age = sa.Column(sa.Integer, index=True)
     description = sa.Column(sa.Unicode(255))
-    address_id = sa.Column(sa.Integer, sa.ForeignKey(Address.id))
+    address_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey(
+            Address.id,
+            deferrable=True,
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        )
+    )
 
     address = sa.orm.relationship(Address)

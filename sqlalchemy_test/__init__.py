@@ -17,6 +17,14 @@ class ModelTestCase(object):
                 columns[column.name] = column
         return columns
 
+    @property
+    def foreign_keys(self):
+        foreign_keys = {}
+        for name, column in self.columns.items():
+            if column.foreign_keys:
+                foreign_keys[name] = list(column.foreign_keys)
+        return foreign_keys
+
     def test_has_primary_key(self):
         assert any(column.primary_key for column in self.columns.values())
 
@@ -43,8 +51,15 @@ class ModelTestCase(object):
     def assert_primary_key(self, column_name):
         assert self.columns[column_name].primary_key
 
-    def assert_foreign_key(self, column_name):
-        assert self.columns[column_name].foreign_keys
+    def assert_foreign_key(self, column_name, foreign_key):
+        fks = self.foreign_keys[column_name]
+        for fk in fks:
+            if fk.target_fullname == foreign_key.target_fullname:
+                assert fk.deferrable == foreign_key.deferrable
+                assert fk.ondelete == foreign_key.ondelete
+                assert fk.onupdate == foreign_key.onupdate
+                assert fk.initially == foreign_key.initially
+                assert fk.name == foreign_key.name
 
     def assert_unique(self, column_name):
         assert self.columns[column_name].unique
@@ -106,7 +121,10 @@ def generate_test_case(model, path):
         if column.primary_key:
             lines.extend(generate_primary_key_test(name))
         if column.foreign_keys:
-            lines.extend(generate_foreign_key_test(name))
+            counter = 1
+            for fk in column.foreign_keys:
+                lines.extend(generate_foreign_key_test(name, fk, counter))
+                counter += 1
         if column.default:
             lines.extend(generate_default_test(name, column.default.arg))
         if column.server_default:
@@ -168,11 +186,32 @@ def generate_primary_key_test(name):
     ]
 
 
-def generate_foreign_key_test(name):
-    return [
-        "    def test_%s_has_foreign_key(self):" % name.lower(),
-        "        self.assert_foreign_key('%s')%s" % (name.lower(), os.linesep)
+def generate_foreign_key_test(name, fk, counter):
+    lines = [
+        "    def test_%s_fk%d(self):" % (name.lower(), counter),
+        "        self.assert_foreign_key(",
+        "            '%s'," % name.lower(),
+        "            sa.ForeignKey(",
+        "                'Address.id',",
     ]
+    if fk.deferrable:
+        lines.append(
+            "                deferrable=True,"
+        )
+    if fk.ondelete:
+        lines.append(
+            "                ondelete='%s'," % fk.ondelete
+        )
+    if fk.onupdate:
+        lines.append(
+            "                onupdate='%s'," % fk.onupdate
+        )
+
+    lines.extend([
+        "            )",
+        "        )" + os.linesep,
+    ])
+    return lines
 
 
 def generate_autoincrement_test(name):
