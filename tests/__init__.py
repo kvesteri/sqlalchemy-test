@@ -28,7 +28,11 @@ class User(Entity):
     status = sa.Column(sa.Enum(*STATUSES))
     is_active = sa.Column(sa.Boolean, default=False, server_default='FALSE')
     is_confirmed = sa.Column(sa.Boolean, server_default=false())
-    age = sa.Column(sa.Integer, index=True)
+    age = sa.Column(
+        sa.Integer,
+        sa.schema.CheckConstraint('age > 13'),
+        index=True
+    )
     description = sa.Column(sa.Unicode(255))
     address_id = sa.Column(
         sa.Integer,

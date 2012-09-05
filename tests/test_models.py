@@ -65,6 +65,15 @@ class TestUser(TestEntity):
             )
         )
 
+    def test_assert_check_constraint(self):
+        self.assert_check_constraint(
+            'age', sa.schema.CheckConstraint('age > 13')
+        )
+        with raises(AssertionError):
+            self.assert_check_constraint(
+                'age', sa.schema.CheckConstraint('age < 13')
+            )
+
 
 class TestTestCaseGeneration(object):
     def test_something(self):

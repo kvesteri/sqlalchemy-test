@@ -51,6 +51,17 @@ class ModelTestCase(object):
     def assert_primary_key(self, column_name):
         assert self.columns[column_name].primary_key
 
+    def assert_check_constraint(self, column_name, check_constraint):
+        found = False
+        for constraint in self.columns[column_name].constraints:
+            if constraint.sqltext.text == check_constraint.sqltext.text:
+                found = True
+
+        if not found:
+            assert False, "Column %s did not have check constraint %r" % (
+                column_name, check_constraint
+            )
+
     def assert_foreign_key(self, column_name, foreign_key):
         fks = self.foreign_keys[column_name]
         for fk in fks:

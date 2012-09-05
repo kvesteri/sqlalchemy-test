@@ -107,6 +107,24 @@ class TestUser(ModelTestCase):
     def test_is_active_is_autoincremented(self):
         self.assert_autoincrement('is_active')
 
+    def test_has_email(self):
+        self.assert_has('email')
+
+    def test_email_is_unicode(self):
+        self.assert_type('email', sa.Unicode)
+
+    def test_email_is_not_nullable(self):
+        self.assert_not_nullable('email')
+
+    def test_email_length_is_255(self):
+        self.assert_length('email', 255)
+
+    def test_email_is_autoincremented(self):
+        self.assert_autoincrement('email')
+
+    def test_email_is_unique(self):
+        self.assert_unique('email')
+
     def test_has_id(self):
         self.assert_has('id')
 
@@ -129,24 +147,6 @@ class TestUser(ModelTestCase):
 
     def test_id_is_autoincremented(self):
         self.assert_autoincrement('id')
-
-    def test_has_email(self):
-        self.assert_has('email')
-
-    def test_email_is_unicode(self):
-        self.assert_type('email', sa.Unicode)
-
-    def test_email_is_not_nullable(self):
-        self.assert_not_nullable('email')
-
-    def test_email_length_is_255(self):
-        self.assert_length('email', 255)
-
-    def test_email_is_autoincremented(self):
-        self.assert_autoincrement('email')
-
-    def test_email_is_unique(self):
-        self.assert_unique('email')
 
     def test_has_description(self):
         self.assert_has('description')
