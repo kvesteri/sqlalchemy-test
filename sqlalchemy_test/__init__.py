@@ -1,4 +1,5 @@
 import os
+from inflection import underscore
 from sqlalchemy.sql.expression import _False, _True
 from sqlalchemy.orm.properties import ColumnProperty
 
@@ -111,7 +112,7 @@ def generate_test_case(model, path):
             column = prop.columns[0]
             columns[column.name] = column
 
-    file_ = open('%stest_%s.py' % (path, model.__name__.lower()), 'w+')
+    file_ = open('%stest_%s.py' % (path, underscore(model.__name__)), 'w+')
     lines = [
         'import sqlalchemy as sa',
         'from sqlalchemy_test import ModelTestCase',
@@ -143,8 +144,6 @@ def generate_test_case(model, path):
             lines.extend(
                 generate_server_default_test(name, column.server_default.arg)
             )
-        if column.autoincrement:
-            lines.extend(generate_autoincrement_test(name))
         if column.unique:
             lines.extend(generate_unique_test(name))
     file_.writelines(map(lambda a: a + os.linesep, lines))

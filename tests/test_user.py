@@ -59,9 +59,6 @@ class TestUser(ModelTestCase):
     def test_default_of_name(self):
         self.assert_default('name', '')
 
-    def test_name_is_autoincremented(self):
-        self.assert_autoincrement('name')
-
     def test_has_is_confirmed(self):
         self.assert_has('is_confirmed')
 

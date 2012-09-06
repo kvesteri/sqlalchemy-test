@@ -19,6 +19,9 @@ class TestEntity(ModelTestCase):
     def test_assert_autoincrement(self):
         self.assert_autoincrement('id')
 
+    def test_assert_not_autoincrement(self):
+        self.assert_not_autoincrement('name')
+
 
 class TestUser(TestEntity):
     model = User

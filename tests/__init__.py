@@ -9,7 +9,10 @@ Base = declarative_base()
 class Entity(Base):
     __tablename__ = 'entity'
     id = sa.Column(sa.BigInteger, autoincrement=True, primary_key=True)
-    name = sa.Column(sa.Unicode(255), index=True, nullable=False, default=u'')
+    name = sa.Column(
+        sa.Unicode(255), autoincrement=False, index=True,
+        nullable=False, default=u''
+    )
 
 
 class Address(Base):
