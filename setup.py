@@ -37,6 +37,7 @@ setup(
     platforms='any',
     install_requires=[
         'SQLAlchemy>=0.7',
+        'inflection>=0.1.2'
     ],
     cmdclass={'test': PyTest},
     classifiers=[
