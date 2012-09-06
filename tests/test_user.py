@@ -151,14 +151,11 @@ class TestUser(ModelTestCase):
     def test_has_description(self):
         self.assert_has('description')
 
-    def test_description_is_unicode(self):
-        self.assert_type('description', sa.Unicode)
+    def test_description_is_unicodetext(self):
+        self.assert_type('description', sa.UnicodeText)
 
     def test_description_is_nullable(self):
         self.assert_nullable('description')
-
-    def test_description_length_is_255(self):
-        self.assert_length('description', 255)
 
     def test_description_is_autoincremented(self):
         self.assert_autoincrement('description')

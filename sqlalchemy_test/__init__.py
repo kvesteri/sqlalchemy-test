@@ -110,6 +110,7 @@ def generate_test_case(model, path):
         if isinstance(prop, ColumnProperty):
             column = prop.columns[0]
             columns[column.name] = column
+
     file_ = open('%stest_%s.py' % (path, model.__name__.lower()), 'w+')
     lines = [
         'import sqlalchemy as sa',
@@ -127,7 +128,7 @@ def generate_test_case(model, path):
             lines.extend(generate_nullable_test(name))
         else:
             lines.extend(generate_not_nullable_test(name))
-        if hasattr(column.type, 'length'):
+        if hasattr(column.type, 'length') and column.type.length:
             lines.extend(generate_length_test(name, column.type.length))
         if column.primary_key:
             lines.extend(generate_primary_key_test(name))

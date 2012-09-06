@@ -33,7 +33,7 @@ class User(Entity):
         sa.schema.CheckConstraint('age > 13'),
         index=True
     )
-    description = sa.Column(sa.Unicode(255))
+    description = sa.Column(sa.UnicodeText)
     address_id = sa.Column(
         sa.Integer,
         sa.ForeignKey(

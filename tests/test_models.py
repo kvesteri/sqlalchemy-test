@@ -30,7 +30,7 @@ class TestUser(TestEntity):
         self.assert_nullable('age')
 
     def test_assert_length(self):
-        self.assert_length('description', 255)
+        self.assert_length('email', 255)
 
     def test_assert_has_for_existing_column(self):
         self.assert_has('age')
