@@ -44,23 +44,17 @@ class TestUser(ModelTestCase):
     def test_address_id_is_autoincremented(self):
         self.assert_autoincrement('address_id')
 
-    def test_has_name(self):
-        self.assert_has('name')
+    def test_has_description(self):
+        self.assert_has('description')
 
-    def test_name_is_unicode(self):
-        self.assert_type('name', sa.Unicode)
+    def test_description_is_unicodetext(self):
+        self.assert_type('description', sa.UnicodeText)
 
-    def test_name_is_not_nullable(self):
-        self.assert_not_nullable('name')
+    def test_description_is_nullable(self):
+        self.assert_nullable('description')
 
-    def test_name_length_is_255(self):
-        self.assert_length('name', 255)
-
-    def test_default_of_name(self):
-        self.assert_default('name', '')
-
-    def test_name_is_autoincremented(self):
-        self.assert_autoincrement('name')
+    def test_description_is_autoincremented(self):
+        self.assert_autoincrement('description')
 
     def test_has_is_confirmed(self):
         self.assert_has('is_confirmed')
@@ -148,15 +142,21 @@ class TestUser(ModelTestCase):
     def test_id_is_autoincremented(self):
         self.assert_autoincrement('id')
 
-    def test_has_description(self):
-        self.assert_has('description')
+    def test_has_name(self):
+        self.assert_has('name')
 
-    def test_description_is_unicodetext(self):
-        self.assert_type('description', sa.UnicodeText)
+    def test_name_is_unicode(self):
+        self.assert_type('name', sa.Unicode)
 
-    def test_description_is_nullable(self):
-        self.assert_nullable('description')
+    def test_name_is_not_nullable(self):
+        self.assert_not_nullable('name')
 
-    def test_description_is_autoincremented(self):
-        self.assert_autoincrement('description')
+    def test_name_length_is_255(self):
+        self.assert_length('name', 255)
+
+    def test_default_of_name(self):
+        self.assert_default('name', '')
+
+    def test_name_is_autoincremented(self):
+        self.assert_autoincrement('name')
 

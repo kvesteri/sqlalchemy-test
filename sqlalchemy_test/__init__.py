@@ -236,20 +236,17 @@ def generate_autoincrement_test(name):
 
 
 def generate_default_test(name, default):
-    lines = ["    def test_default_of_%s(self):" % name.lower()]
-
     if isinstance(default, basestring):
-        lines.append(
-            "        self.assert_default('%s', '%s')%s" % (
-                name.lower(), default, os.linesep
-            )
+        default = "'%s'" % default
+    elif callable(default):
+        return []
+
+    lines = [
+        "    def test_default_of_%s(self):" % name.lower(),
+        "        self.assert_default('%s', %s)%s" % (
+            name.lower(), default, os.linesep
         )
-    else:
-        lines.append(
-            "        self.assert_default('%s', %s)%s" % (
-                name.lower(), default, os.linesep
-            )
-        )
+    ]
     return lines
 
 
