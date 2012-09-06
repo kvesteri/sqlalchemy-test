@@ -257,6 +257,10 @@ def generate_server_default_test(name, default):
         default = 'sa.sql.expression.false()'
     elif isinstance(default, _True):
         default = 'sa.sql.expression.true()'
+    elif callable(default):
+        return []
+    elif isinstance(default, object):
+        return []
 
     return [
         "    def test_server_default_of_%s(self):" % name.lower(),

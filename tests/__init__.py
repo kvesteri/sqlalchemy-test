@@ -33,7 +33,10 @@ class User(Entity):
         sa.schema.CheckConstraint('age > 13'),
         index=True
     )
-    description = sa.Column(sa.UnicodeText, default=lambda a: '')
+    description = sa.Column(
+        sa.UnicodeText, default=lambda a: ''
+    )
+    created_at = sa.Column(sa.DateTime, server_default=sa.func.now())
     address_id = sa.Column(
         sa.Integer,
         sa.ForeignKey(
