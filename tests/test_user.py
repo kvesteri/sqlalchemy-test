@@ -65,14 +65,14 @@ class TestUser(ModelTestCase):
     def test_server_default_of_is_confirmed(self):
         self.assert_server_default('is_confirmed', sa.sql.expression.false())
 
-    def test_has_age(self):
-        self.assert_has('age')
+    def test_has_created_at(self):
+        self.assert_has('created_at')
 
-    def test_age_is_integer(self):
-        self.assert_type('age', sa.Integer)
+    def test_created_at_is_datetime(self):
+        self.assert_type('created_at', sa.DateTime)
 
-    def test_age_is_nullable(self):
-        self.assert_nullable('age')
+    def test_created_at_is_nullable(self):
+        self.assert_nullable('created_at')
 
     def test_has_is_active(self):
         self.assert_has('is_active')
@@ -109,6 +109,15 @@ class TestUser(ModelTestCase):
             )
         )
 
+    def test_has_age(self):
+        self.assert_has('age')
+
+    def test_age_is_integer(self):
+        self.assert_type('age', sa.Integer)
+
+    def test_age_is_nullable(self):
+        self.assert_nullable('age')
+
     def test_has_email(self):
         self.assert_has('email')
 
@@ -123,15 +132,6 @@ class TestUser(ModelTestCase):
 
     def test_email_is_unique(self):
         self.assert_unique('email')
-
-    def test_has_created_at(self):
-        self.assert_has('created_at')
-
-    def test_created_at_is_datetime(self):
-        self.assert_type('created_at', sa.DateTime)
-
-    def test_created_at_is_nullable(self):
-        self.assert_nullable('created_at')
 
     def test_has_description(self):
         self.assert_has('description')

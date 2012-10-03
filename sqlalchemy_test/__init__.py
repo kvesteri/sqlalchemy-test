@@ -104,173 +104,190 @@ class ModelTestCase(object):
 
 
 def generate_test_case(model, path):
-    fields = set(model._sa_class_manager.values())
-    columns = {}
-    for field in fields:
-        prop = field.property
-        if isinstance(prop, ColumnProperty):
-            column = prop.columns[0]
-            columns[column.name] = column
-
     file_ = open('%stest_%s.py' % (path, underscore(model.__name__)), 'w+')
-    lines = [
-        'import sqlalchemy as sa',
-        'from sqlalchemy_test import ModelTestCase',
-        'from %s import %s' % (model.__module__, model.__name__),
-        os.linesep,
-        'class Test%s(ModelTestCase):' % model.__name__,
-        '    model = %s%s' % (model.__name__, os.linesep)
-    ]
 
-    for name, column in columns.items():
-        lines.extend(generate_has_column_test(name))
-        lines.extend(generate_type_test(name, column.type))
-        if column.nullable:
-            lines.extend(generate_nullable_test(name))
-        else:
-            lines.extend(generate_not_nullable_test(name))
-        if hasattr(column.type, 'length') and column.type.length:
-            lines.extend(generate_length_test(name, column.type.length))
-        if column.primary_key:
-            lines.extend(generate_primary_key_test(name))
-        if column.foreign_keys:
-            counter = 1
-            for fk in column.foreign_keys:
-                lines.extend(generate_foreign_key_test(name, fk, counter))
-                counter += 1
-        if column.default:
-            lines.extend(generate_default_test(name, column.default.arg))
-        if column.server_default:
-            lines.extend(
-                generate_server_default_test(name, column.server_default.arg)
+    generator = TestCaseGenerator(model)
+    generator.process_columns()
+
+    file_.writelines(
+        map(lambda a: a + os.linesep, generator.imports + generator.lines)
+    )
+
+
+class TestCaseGenerator(object):
+    def __init__(self, model):
+        fields = set(model._sa_class_manager.values())
+        self.columns = {}
+        for field in fields:
+            prop = field.property
+            if isinstance(prop, ColumnProperty):
+                column = prop.columns[0]
+                self.columns[column.name] = column
+
+        self.imports = [
+            'import sqlalchemy as sa',
+            'from sqlalchemy_test import ModelTestCase',
+            'from %s import %s' % (model.__module__, model.__name__),
+        ]
+
+        self.lines = [
+            os.linesep,
+            'class Test%s(ModelTestCase):' % model.__name__,
+            '    model = %s%s' % (model.__name__, os.linesep)
+        ]
+
+    def process_columns(self):
+        lines = []
+        for name, column in self.columns.items():
+            lines.extend(self.has_column_test(name))
+            lines.extend(self.type_test(name, column.type))
+            if column.nullable:
+                lines.extend(self.nullable_test(name))
+            else:
+                lines.extend(self.not_nullable_test(name))
+            if hasattr(column.type, 'length') and column.type.length:
+                lines.extend(self.length_test(name, column.type.length))
+            if column.primary_key:
+                lines.extend(self.primary_key_test(name))
+            if column.foreign_keys:
+                counter = 1
+                for fk in column.foreign_keys:
+                    lines.extend(self.foreign_key_test(name, fk, counter))
+                    counter += 1
+            if column.default:
+                lines.extend(self.default_test(name, column.default.arg))
+            if column.server_default:
+                lines.extend(
+                    self.server_default_test(name, column.server_default.arg)
+                )
+            if column.unique:
+                lines.extend(self.unique_test(name))
+        self.lines += lines
+
+    def has_column_test(self, name):
+        return [
+            "    def test_has_%s(self):" % name.lower(),
+            "        self.assert_has('%s')%s" % (name.lower(), os.linesep)
+        ]
+
+    def nullable_test(self, name):
+        return [
+            "    def test_%s_is_nullable(self):" % name.lower(),
+            "        self.assert_nullable('%s')%s" % (name.lower(), os.linesep)
+        ]
+
+    def not_nullable_test(self, name):
+        return [
+            "    def test_%s_is_not_nullable(self):" % name.lower(),
+            "        self.assert_not_nullable('%s')%s" % (
+                name.lower(), os.linesep
             )
-        if column.unique:
-            lines.extend(generate_unique_test(name))
-    file_.writelines(map(lambda a: a + os.linesep, lines))
+        ]
 
+    def length_test(self, name, length):
+        return [
+            "    def test_%s_length_is_%d(self):" % (name.lower(), length),
+            "        self.assert_length('%s', %d)%s" % (
+                name.lower(), length, os.linesep
+            )
+        ]
 
-def generate_has_column_test(name):
-    return [
-        "    def test_has_%s(self):" % name.lower(),
-        "        self.assert_has('%s')%s" % (name.lower(), os.linesep)
-    ]
+    def type_test(self, name, type_):
+        if type_.__module__ == 'sqlalchemy.types':
+            class_name = 'sa.' + type_.__class__.__name__
+        else:
+            class_name = type_.__class__.__name__
+            self.imports.append(
+                'from %s import %s' % (type_.__module__, class_name)
+            )
 
+        return [
+            "    def test_%s_is_%s(self):" % (
+                name.lower(), type_.__class__.__name__.lower()
+            ),
+            "        self.assert_type('%s', %s)%s" % (
+                name.lower(), class_name, os.linesep
+            )
+        ]
 
-def generate_nullable_test(name):
-    return [
-        "    def test_%s_is_nullable(self):" % name.lower(),
-        "        self.assert_nullable('%s')%s" % (name.lower(), os.linesep)
-    ]
+    def primary_key_test(self, name):
+        return [
+            "    def test_%s_is_primary_key(self):" % name.lower(),
+            "        self.assert_primary_key('%s')%s" % (
+                name.lower(), os.linesep
+            )
+        ]
 
+    def foreign_key_test(self, name, fk, counter):
+        lines = [
+            "    def test_%s_fk%d(self):" % (name.lower(), counter),
+            "        self.assert_foreign_key(",
+            "            '%s'," % name.lower(),
+            "            sa.ForeignKey(",
+            "                'Address.id',",
+        ]
+        if fk.deferrable:
+            lines.append(
+                "                deferrable=True,"
+            )
+        if fk.ondelete:
+            lines.append(
+                "                ondelete='%s'," % fk.ondelete
+            )
+        if fk.onupdate:
+            lines.append(
+                "                onupdate='%s'," % fk.onupdate
+            )
 
-def generate_not_nullable_test(name):
-    return [
-        "    def test_%s_is_not_nullable(self):" % name.lower(),
-        "        self.assert_not_nullable('%s')%s" % (name.lower(), os.linesep)
-    ]
+        lines.extend([
+            "            )",
+            "        )" + os.linesep,
+        ])
+        return lines
 
+    def autoincrement_test(self, name):
+        return [
+            "    def test_%s_is_autoincremented(self):" % name.lower(),
+            "        self.assert_autoincrement('%s')%s" % (
+                name.lower(), os.linesep
+            )
+        ]
 
-def generate_length_test(name, length):
-    return [
-        "    def test_%s_length_is_%d(self):" % (name.lower(), length),
-        "        self.assert_length('%s', %d)%s" % (
-            name.lower(), length, os.linesep
-        )
-    ]
+    def default_test(self, name, default):
+        if isinstance(default, basestring):
+            default = "'%s'" % default
+        elif callable(default):
+            return []
 
+        lines = [
+            "    def test_default_of_%s(self):" % name.lower(),
+            "        self.assert_default('%s', %s)%s" % (
+                name.lower(), default, os.linesep
+            )
+        ]
+        return lines
 
-def generate_type_test(name, type_):
-    return [
-        "    def test_%s_is_%s(self):" % (
-            name.lower(), type_.__class__.__name__.lower()
-        ),
-        "        self.assert_type('%s', sa.%s)%s" % (
-            name.lower(), type_.__class__.__name__, os.linesep
-        )
-    ]
+    def server_default_test(self, name, default):
+        if isinstance(default, basestring):
+            default = "'%s'" % default
+        elif isinstance(default, _False):
+            default = 'sa.sql.expression.false()'
+        elif isinstance(default, _True):
+            default = 'sa.sql.expression.true()'
+        elif callable(default):
+            return []
+        elif isinstance(default, object):
+            return []
 
+        return [
+            "    def test_server_default_of_%s(self):" % name.lower(),
+            "        self.assert_server_default('%s', %s)%s" % (
+                name.lower(), default, os.linesep
+            )
+        ]
 
-def generate_primary_key_test(name):
-    return [
-        "    def test_%s_is_primary_key(self):" % name.lower(),
-        "        self.assert_primary_key('%s')%s" % (name.lower(), os.linesep)
-    ]
-
-
-def generate_foreign_key_test(name, fk, counter):
-    lines = [
-        "    def test_%s_fk%d(self):" % (name.lower(), counter),
-        "        self.assert_foreign_key(",
-        "            '%s'," % name.lower(),
-        "            sa.ForeignKey(",
-        "                'Address.id',",
-    ]
-    if fk.deferrable:
-        lines.append(
-            "                deferrable=True,"
-        )
-    if fk.ondelete:
-        lines.append(
-            "                ondelete='%s'," % fk.ondelete
-        )
-    if fk.onupdate:
-        lines.append(
-            "                onupdate='%s'," % fk.onupdate
-        )
-
-    lines.extend([
-        "            )",
-        "        )" + os.linesep,
-    ])
-    return lines
-
-
-def generate_autoincrement_test(name):
-    return [
-        "    def test_%s_is_autoincremented(self):" % name.lower(),
-        "        self.assert_autoincrement('%s')%s" % (
-            name.lower(), os.linesep
-        )
-    ]
-
-
-def generate_default_test(name, default):
-    if isinstance(default, basestring):
-        default = "'%s'" % default
-    elif callable(default):
-        return []
-
-    lines = [
-        "    def test_default_of_%s(self):" % name.lower(),
-        "        self.assert_default('%s', %s)%s" % (
-            name.lower(), default, os.linesep
-        )
-    ]
-    return lines
-
-
-def generate_server_default_test(name, default):
-    if isinstance(default, basestring):
-        default = "'%s'" % default
-    elif isinstance(default, _False):
-        default = 'sa.sql.expression.false()'
-    elif isinstance(default, _True):
-        default = 'sa.sql.expression.true()'
-    elif callable(default):
-        return []
-    elif isinstance(default, object):
-        return []
-
-    return [
-        "    def test_server_default_of_%s(self):" % name.lower(),
-        "        self.assert_server_default('%s', %s)%s" % (
-            name.lower(), default, os.linesep
-        )
-    ]
-
-
-def generate_unique_test(name):
-    return [
-        "    def test_%s_is_unique(self):" % name.lower(),
-        "        self.assert_unique('%s')%s" % (name.lower(), os.linesep)
-    ]
+    def unique_test(self, name):
+        return [
+            "    def test_%s_is_unique(self):" % name.lower(),
+            "        self.assert_unique('%s')%s" % (name.lower(), os.linesep)
+        ]

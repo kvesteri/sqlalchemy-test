@@ -6,6 +6,25 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
+class CustomType(sa.types.TypeDecorator):
+    """
+    CustomType for testing purposes
+    """
+    impl = sa.types.UnicodeText
+
+    def __init__(self, *args, **kwargs):
+        sa.types.TypeDecorator.__init__(self, *args, **kwargs)
+
+    def process_bind_param(self, value, dialect):
+        return value
+
+    def process_result_value(self, value, dialect):
+        return value
+
+    def copy(self):
+        return CustomType()
+
+
 class Entity(Base):
     __tablename__ = 'entity'
     id = sa.Column(sa.BigInteger, autoincrement=True, primary_key=True)
@@ -19,6 +38,7 @@ class Address(Base):
     __tablename__ = 'address'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    name = sa.Column(CustomType)
 
 
 class User(Entity):

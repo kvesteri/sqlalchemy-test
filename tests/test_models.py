@@ -81,3 +81,4 @@ class TestUser(TestEntity):
 class TestTestCaseGeneration(object):
     def test_something(self):
         generate_test_case(User, 'tests/')
+        generate_test_case(Address, 'tests/')
