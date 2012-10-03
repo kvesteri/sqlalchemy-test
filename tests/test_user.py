@@ -18,9 +18,6 @@ class TestUser(ModelTestCase):
     def test_status_length_is_7(self):
         self.assert_length('status', 7)
 
-    def test_status_is_autoincremented(self):
-        self.assert_autoincrement('status')
-
     def test_has_address_id(self):
         self.assert_has('address_id')
 
@@ -40,9 +37,6 @@ class TestUser(ModelTestCase):
                 onupdate='CASCADE',
             )
         )
-
-    def test_address_id_is_autoincremented(self):
-        self.assert_autoincrement('address_id')
 
     def test_has_name(self):
         self.assert_has('name')
@@ -71,20 +65,14 @@ class TestUser(ModelTestCase):
     def test_server_default_of_is_confirmed(self):
         self.assert_server_default('is_confirmed', sa.sql.expression.false())
 
-    def test_is_confirmed_is_autoincremented(self):
-        self.assert_autoincrement('is_confirmed')
+    def test_has_age(self):
+        self.assert_has('age')
 
-    def test_has_created_at(self):
-        self.assert_has('created_at')
+    def test_age_is_integer(self):
+        self.assert_type('age', sa.Integer)
 
-    def test_created_at_is_datetime(self):
-        self.assert_type('created_at', sa.DateTime)
-
-    def test_created_at_is_nullable(self):
-        self.assert_nullable('created_at')
-
-    def test_created_at_is_autoincremented(self):
-        self.assert_autoincrement('created_at')
+    def test_age_is_nullable(self):
+        self.assert_nullable('age')
 
     def test_has_is_active(self):
         self.assert_has('is_active')
@@ -100,9 +88,6 @@ class TestUser(ModelTestCase):
 
     def test_server_default_of_is_active(self):
         self.assert_server_default('is_active', 'FALSE')
-
-    def test_is_active_is_autoincremented(self):
-        self.assert_autoincrement('is_active')
 
     def test_has_id(self):
         self.assert_has('id')
@@ -124,21 +109,6 @@ class TestUser(ModelTestCase):
             )
         )
 
-    def test_id_is_autoincremented(self):
-        self.assert_autoincrement('id')
-
-    def test_has_age(self):
-        self.assert_has('age')
-
-    def test_age_is_integer(self):
-        self.assert_type('age', sa.Integer)
-
-    def test_age_is_nullable(self):
-        self.assert_nullable('age')
-
-    def test_age_is_autoincremented(self):
-        self.assert_autoincrement('age')
-
     def test_has_email(self):
         self.assert_has('email')
 
@@ -151,11 +121,17 @@ class TestUser(ModelTestCase):
     def test_email_length_is_255(self):
         self.assert_length('email', 255)
 
-    def test_email_is_autoincremented(self):
-        self.assert_autoincrement('email')
-
     def test_email_is_unique(self):
         self.assert_unique('email')
+
+    def test_has_created_at(self):
+        self.assert_has('created_at')
+
+    def test_created_at_is_datetime(self):
+        self.assert_type('created_at', sa.DateTime)
+
+    def test_created_at_is_nullable(self):
+        self.assert_nullable('created_at')
 
     def test_has_description(self):
         self.assert_has('description')
@@ -165,7 +141,4 @@ class TestUser(ModelTestCase):
 
     def test_description_is_nullable(self):
         self.assert_nullable('description')
-
-    def test_description_is_autoincremented(self):
-        self.assert_autoincrement('description')
 
