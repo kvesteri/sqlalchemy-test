@@ -197,9 +197,11 @@ class TestCaseGenerator(object):
             class_name = 'sa.' + type_.__class__.__name__
         else:
             class_name = type_.__class__.__name__
-            self.imports.append(
-                'from %s import %s' % (type_.__module__, class_name)
-            )
+            import_line = 'from %s import %s' % (type_.__module__, class_name)
+            if import_line not in self.imports:
+                self.imports.append(
+                    import_line
+                )
 
         return [
             "    def test_%s_is_%s(self):" % (
